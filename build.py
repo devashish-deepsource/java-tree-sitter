@@ -68,7 +68,7 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
     with tempfile.TemporaryDirectory(suffix="tree_sitter_language") as out_dir:
         object_paths = []
         for source_path in source_paths:
-            flags = ["-O3"]
+            flags = ["-O3", "-stdlib=libc++"]
 
             if platform.system() == "Linux":
                 flags.append("-fPIC")
@@ -102,6 +102,7 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         extra_preargs = []
         if platform.system() == "Darwin":
             extra_preargs.append("-dynamiclib")
+            extra_preargs.append("-lstdc++")
 
         if arch:
             extra_preargs += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]

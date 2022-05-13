@@ -54,17 +54,14 @@ public class TreeCursor implements AutoCloseable, Iterator<TreeCursorNode> {
     if (curr.isNull()) return false;
     // If this node has children, return true.
     if (curr.getChildCount() > 0) {
-      System.out.println("next is child");
       return true;
     }
     // If this node has no children but has a sibling, return true.
     if (curr.hasNextSibling()) {
-      System.out.println("next is sibling");
       return true;
     }
     // If this node has no children or next sibling, but has a parent, return true.
     if (curr.hasParent()) {
-      System.out.println("next is parent sibling");
       return true;
     }
     // There's a lint that attempts to simplify this if statement above, but we want clarity.
