@@ -2,6 +2,13 @@ package ai.serenade.treesitter;
 
 public class TreeSitter {
 
+  static {
+    // preload from env.
+    if (System.getenv().containsKey("JAVA_TREE_SITTER")) {
+      System.load(System.getenv("JAVA_TREE_SITTER"));
+    }
+  }
+
   public static native Node nodeChild(Node node, int child);
 
   public static native int nodeChildCount(Node node);

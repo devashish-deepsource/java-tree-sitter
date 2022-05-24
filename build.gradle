@@ -6,6 +6,8 @@ plugins {
 group = "ai.serenade"
 version = "1.1.1"
 
+String lib = (System.getProperty("os.name").contains("Mac")) ? "${project.projectDir.toString()}/libjava-tree-sitter.dylib" : "${project.projectDir.toString()}/libjava-tree-sitter.so"
+
 repositories {
     mavenLocal()
     mavenCentral()
@@ -61,7 +63,6 @@ test {
         events "passed", "skipped", "failed"
     }
 
-    String resPath = (System.getProperty("os.name").contains("Mac")) ? "${project.projectDir.toString()}/libjava-tree-sitter.dylib" : "${project.projectDir.toString()}/libjava-tree-sitter.so"
-    println(resPath)
-    environment "JAVA_TREE_SITTER", resPath
+    println()
+    environment "JAVA_TREE_SITTER", lib
 }
