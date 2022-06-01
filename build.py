@@ -2,6 +2,7 @@
 
 import argparse
 import ctypes.util
+import distutils.log as log
 import distutils.ccompiler
 import os
 import platform
@@ -10,7 +11,8 @@ import tempfile
 
 
 # adapted from https://github.com/tree-sitter/py-tree-sitter
-def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=False):
+def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=True):
+    log.set_verbosity(2)
     if arch and platform.system() != "Darwin":
         arch = "64" if "64" in arch else "32"
 
@@ -68,14 +70,15 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
     with tempfile.TemporaryDirectory(suffix="tree_sitter_language") as out_dir:
         object_paths = []
         for source_path in source_paths:
-            flags = ["-O3", "-stdlib=libc++" if platform.system() == "Darwin" else "-stdlib=libstdc++"]
+            flags = ["-O3", "-static"]
 
             if platform.system() == "Linux":
                 flags.append("-fPIC")
 
             if source_path.endswith(".c"):
                 flags.append("-std=c99")
-
+            elif source_path.endswith(".cc"):
+                flags.append("-lstdc++")
             if arch:
                 flags += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]
 
@@ -102,7 +105,6 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Fa
         extra_preargs = []
         if platform.system() == "Darwin":
             extra_preargs.append("-dynamiclib")
-            extra_preargs.append("-lstdc++")
 
         if arch:
             extra_preargs += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]

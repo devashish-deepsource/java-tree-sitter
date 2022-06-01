@@ -23,6 +23,8 @@ public class NodeTest extends TestBase {
         assertEquals("class_declaration", function.getType());
         assertEquals(4, function.getChildCount());
       }
+    } catch (Throwable e) {
+        e.printStackTrace();
     }
   }
 

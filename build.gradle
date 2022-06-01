@@ -6,7 +6,7 @@ plugins {
 group = "ai.serenade"
 version = "1.1.1"
 
-String lib = (System.getProperty("os.name").contains("Mac")) ? "${project.projectDir.toString()}/libjava-tree-sitter.dylib" : "${project.projectDir.toString()}/libjava-tree-sitter.so"
+String lib = (System.getProperty("os.name").contains("Mac")) ? "${project.projectDir}/libjava-tree-sitter.dylib" : "${project.projectDir}/libjava-tree-sitter.so"
 
 repositories {
     mavenLocal()
@@ -28,7 +28,7 @@ task buildSharedObject {
         exec {
 
             environment << env
-            commandLine "./build.py", "tree-sitter-java"
+            commandLine "./build.py", "-o", "libjava-tree-sitter", "tree-sitter-java"
         }
     }
 }
@@ -59,10 +59,7 @@ dependencies {
 
 test {
     useJUnitPlatform()
-    testLogging {
-        events "passed", "skipped", "failed"
-    }
-
-    println()
+        testLogging.showStandardStreams = true
+    System.out.println(lib)
     environment "JAVA_TREE_SITTER", lib
 }

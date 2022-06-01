@@ -1,8 +1,9 @@
 package ai.serenade.treesitter;
 
-public class TestBase {
+import java.io.File;
 
+public class TestBase {
   static {
-    System.load(System.getenv("JAVA_TREE_SITTER"));
+    System.out.println(TreeSitter.class);
   }
 }
