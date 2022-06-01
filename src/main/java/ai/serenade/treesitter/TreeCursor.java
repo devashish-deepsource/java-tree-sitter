@@ -18,6 +18,7 @@ public class TreeCursor implements AutoCloseable, Iterator<TreeCursorNode> {
 
   @Override
   public void close() {
+    end = true;
     TreeSitter.treeCursorDelete(pointer);
   }
 
@@ -47,9 +48,10 @@ public class TreeCursor implements AutoCloseable, Iterator<TreeCursorNode> {
 
   @Override
   public boolean hasNext() {
-    Node curr = this.getCurrentNode();
     // If the end flag is set, we assume the iterator is exhausted.
     if (end) return false;
+
+    Node curr = this.getCurrentNode();
     // If this is a null node, return false.
     if (curr.isNull()) return false;
     // If this node has children, return true.
