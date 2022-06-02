@@ -5,15 +5,10 @@ import java.io.File;
 public class TreeSitter {
 
   static {
-    System.out.println(new File(System.getenv("JAVA_TREE_SITTER")).exists());
-    System.out.println("Existing env vars: ");
-    System.getenv().forEach((key, val) -> System.out.printf("%s : %s%n", key, val));
     // preload from env.
     if (System.getenv().containsKey("JAVA_TREE_SITTER")) {
-      System.out.println(System.getenv("JAVA_TREE_SITTER"));
       System.load(System.getenv("JAVA_TREE_SITTER"));
     }
-//    System.load(System.getenv("JAVA_TREE_SITTER"));
   }
 
   public static native Node nodeChild(Node node, int child);

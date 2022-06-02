@@ -12,7 +12,6 @@ import tempfile
 
 # adapted from https://github.com/tree-sitter/py-tree-sitter
 def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=True):
-    log.set_verbosity(2)
     if arch and platform.system() != "Darwin":
         arch = "64" if "64" in arch else "32"
 
@@ -72,6 +71,7 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Tr
         for source_path in source_paths:
             flags = ["-O3"]
 
+            # Make sure there are no implicit usages of libstdc++
             if platform.system() == "Linux":
                 flags.append("-fPIC")
                 flags.append("-fno-exceptions")
