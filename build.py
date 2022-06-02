@@ -70,15 +70,15 @@ def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=Tr
     with tempfile.TemporaryDirectory(suffix="tree_sitter_language") as out_dir:
         object_paths = []
         for source_path in source_paths:
-            flags = ["-O3", "-static"]
+            flags = ["-O3"]
 
             if platform.system() == "Linux":
                 flags.append("-fPIC")
+                flags.append("-fno-exceptions")
+                flags.append("-fno-rtti")
 
             if source_path.endswith(".c"):
                 flags.append("-std=c99")
-            elif source_path.endswith(".cc"):
-                flags.append("-lstdc++")
             if arch:
                 flags += ["-arch", arch] if platform.system() == "Darwin" else [f"-m{arch}"]
 
