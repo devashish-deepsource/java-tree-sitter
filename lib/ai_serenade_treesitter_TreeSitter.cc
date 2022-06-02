@@ -3,6 +3,7 @@
 #include <jni.h>
 #include <string.h>
 #include <tree_sitter/api.h>
+#include <stdlib.h>
 
 struct TreeCursorNode {
   const char* type;
@@ -254,8 +255,9 @@ JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_parserParseBytes(
 
 JNIEXPORT jlong JNICALL Java_ai_serenade_treesitter_TreeSitter_treeCursorNew(
     JNIEnv* env, jclass self, jobject node) {
-  TSTreeCursor* cursor =
-      new TSTreeCursor(ts_tree_cursor_new(_unmarshalNode(env, node)));
+  TSTreeCursor* cursor = (TSTreeCursor *)malloc(sizeof(TSTreeCursor));
+  TSTreeCursor val = ts_tree_cursor_new(_unmarshalNode(env, node));
+  memcpy(cursor, &val, sizeof(TSTreeCursor));
   return (jlong)cursor;
 }
 
@@ -289,7 +291,7 @@ Java_ai_serenade_treesitter_TreeSitter_treeCursorCurrentTreeCursorNode(
 
 JNIEXPORT void JNICALL Java_ai_serenade_treesitter_TreeSitter_treeCursorDelete(
     JNIEnv* env, jclass self, jlong cursor) {
-  delete (TSTreeCursor*)cursor;
+  free((void*)cursor);
 }
 
 JNIEXPORT jboolean JNICALL
