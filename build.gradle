@@ -38,6 +38,7 @@ clean {
 }
 
 compileJava {
+    dependsOn buildSharedObject
     options.compilerArgs += ["-h", "${project.projectDir.toString()}/lib"]
 }
 
