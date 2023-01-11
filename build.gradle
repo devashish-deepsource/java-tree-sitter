@@ -18,7 +18,7 @@ task buildSharedObject {
     inputs.file "lib/ai_serenade_treesitter_Languages.h"
     inputs.file "lib/ai_serenade_treesitter_TreeSitter.cc"
     inputs.file "lib/ai_serenade_treesitter_TreeSitter.h"
-    outputs.file "libjava-tree-sitter.so"
+    outputs.file lib
 
     doLast {
         def env = [
@@ -34,7 +34,7 @@ task buildSharedObject {
 }
 
 clean {
-    delete "libjava-tree-sitter.so"
+    delete lib
 }
 
 compileJava {
