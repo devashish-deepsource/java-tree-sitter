@@ -1,49 +1,60 @@
 package ai.serenade.treesitter;
 
 public class TreeCursorNode {
-  private final String type;
-  private final String name;
-  private final int startByte;
-  private final int endByte;
 
-  private final Point startPoint;
+    private long mCursor;
+    private final String type;
+    private final String name;
+    private final int startByte;
+    private final int endByte;
 
-  private final Point endPoint;
+    private final Point startPoint;
 
-  public TreeCursorNode(String type, String name, int startByte, int endByte, Point startPoint, Point endPoint) {
-    this.type = type;
-    this.name = name;
-    this.startByte = startByte;
-    this.endByte = endByte;
-    this.startPoint = startPoint;
-    this.endPoint = endPoint;
-  }
+    private final Point endPoint;
 
-  public String getType() {
-    return type;
-  }
+    public TreeCursorNode(String type, String name, int startByte, int endByte, Point startPoint, Point endPoint) {
+        this.type = type;
+        this.name = name;
+        this.startByte = startByte;
+        this.endByte = endByte;
+        this.startPoint = startPoint;
+        this.endPoint = endPoint;
+    }
 
-  public String getName() {
-    return name;
-  }
+    TreeCursorNode cursor(long cursor) {
+        this.mCursor = cursor;
+        return this;
+    }
 
-  public int getStartByte() {
-    return startByte;
-  }
+    public Node getNode() {
+        return TreeSitter.treeCursorCurrentNode(mCursor);
+    }
 
-  public int getEndByte() {
-    return endByte;
-  }
+    public String getType() {
+        return type;
+    }
 
-  public Point getStartPoint() {
-    return startPoint;
-  }
+    public String getName() {
+        return name;
+    }
 
-  public Point getEndPoint() {
-    return endPoint;
-  }
+    public int getStartByte() {
+        return startByte;
+    }
 
-  public Range getRange() {
-    return new Range(startPoint, endPoint);
-  }
+    public int getEndByte() {
+        return endByte;
+    }
+
+    public Point getStartPoint() {
+        return startPoint;
+    }
+
+    public Point getEndPoint() {
+        return endPoint;
+    }
+
+    public Range getRange() {
+        return new Range(startPoint, endPoint);
+    }
 }
