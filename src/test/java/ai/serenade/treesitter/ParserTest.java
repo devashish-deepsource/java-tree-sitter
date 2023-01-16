@@ -6,6 +6,8 @@ import java.io.UnsupportedEncodingException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import mytree.Span;
+import mytree.TreeWrapper;
 import org.junit.jupiter.api.Test;
 
 public class ParserTest extends TestBase {

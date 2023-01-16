@@ -1,4 +1,6 @@
-package ai.serenade.treesitter;
+package mytree;
+
+import ai.serenade.treesitter.Range;
 
 import java.util.ArrayList;
 import java.util.List;
