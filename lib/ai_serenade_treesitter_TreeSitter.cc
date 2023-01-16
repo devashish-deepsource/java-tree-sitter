@@ -105,8 +105,13 @@ jobject _marshalNode(JNIEnv* env, TSNode node) {
 
 jobject _marshalPoint(JNIEnv* env, TSPoint point) {
   jobject javaObject = env->AllocObject(_pointClass);
+  // FIXME: tree-sitter C implementation represents Strings using UTF-8, which is
+    //  not fully compatible with Java Strings. Due to this, we were seeing the positions
+    //  of the nodes doubled in number (e.g.: N starts at 10 when it actually starts at 5).
+    //  This is a very crude fix to the problem: we are just dividing the row-col position
+    //  by 2. We'll have to come back to it again.
   env->SetIntField(javaObject, _pointRowField, point.row);
-  env->SetIntField(javaObject, _pointColField, point.column);
+  env->SetIntField(javaObject, _pointColField, point.column / 2);
   return javaObject;
 }
 
