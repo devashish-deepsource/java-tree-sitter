@@ -28,7 +28,7 @@ public class NodeTest extends TestBase {
     }
 
     @Test
-    void testGetChildren() throws UnsupportedEncodingException {
+    void testErrors() throws UnsupportedEncodingException {
       try (Parser parser = new Parser()) {
         parser.setLanguage(Languages.java());
         try (Tree tree = parser.parseString("class a { int; }")) {
