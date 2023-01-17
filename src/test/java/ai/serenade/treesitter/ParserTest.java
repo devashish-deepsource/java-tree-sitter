@@ -74,6 +74,7 @@ public class ParserTest extends TestBase {
       String program = Files.readString(path);
       try (Tree tree = parser.parseString(program)) {
         TreeWrapper myTree = new TreeWrapper(tree);
+        //System.out.println(myTree);
         Span position = new Span(new Range(7, 24, 7, 52));
         var offendingCastExpression = myTree.nodeAtSpan(position);
         for (var child : offendingCastExpression.children()) {

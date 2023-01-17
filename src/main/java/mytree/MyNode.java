@@ -11,10 +11,10 @@ public class MyNode {
     private final List<MyNode> children = new ArrayList<>();
     private Span span;
 
-    private boolean isDelete;
+    private boolean isDeleted;
 
     public boolean isDeleted() {
-        return isDelete;
+        return isDeleted;
     }
 
     public MyNode(Node internalNode, MyNode parent) {
@@ -27,8 +27,15 @@ public class MyNode {
         this(internalNode, null);
     }
 
+    private void setDeletedHelper(MyNode parent, boolean deleted) {
+        parent.isDeleted = true;
+        if (parent.isLeaf())
+            return;
+        for (var child : parent.children)
+            setDeletedHelper(child, deleted);
+    }
     public void setDeleted(boolean deleted) {
-        isDelete = deleted;
+        setDeletedHelper(this, deleted);
     }
 
     public void appendChild(MyNode child) {

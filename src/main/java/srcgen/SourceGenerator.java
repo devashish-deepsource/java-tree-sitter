@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 
 public class SourceGenerator {
-    record SourceSegment(String string, Span span) {
+    record SourceSegment(MyNode node, String string, Span span) {
     }
 
     private final List<String> sourceLines;
@@ -52,43 +52,27 @@ public class SourceGenerator {
             builder.append(line).append("\n");
         }
 
-        // It's unlikely that a leaf node expands more than one line, but if it does, we're handling it here.
-        var endLine = sourceLines.get(span.endRow());
-        String endSegment = endLine.substring(0, span.endCol());
-        builder.append(endSegment);
-        return builder.toString();
-    }
-
-    // FIXME: Trailing comments at the end of the line are never considered.
-    private String getWhitespacesBetweenSegments(SourceSegment seg1, SourceSegment seg2) {
-        var sp1 = seg1.span;
-        var sp2 = seg2.span;
-
-        boolean lineOverlaps = sp1.endRow() == sp2.startRow();
-        if (lineOverlaps) {
-            int spaceDiff = Math.abs(sp2.startCol() - sp1.endCol());
-            // There will only be spaces in the middle.
-            return " ".repeat(spaceDiff);
+        try {
+            // It's unlikely that a leaf node expands more than one line, but if it does, we're handling it here.
+            var endLine = sourceLines.get(span.endRow());
+            String endSegment = endLine.substring(0, span.endCol());
+            builder.append(endSegment);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            // Fixme: if the file has a new line at the end and we're splitting by "\n", we will only have 20 elements
+            //  in the array of lines. The OOB happens cause we're trying to query the 21st line.
+            System.out.println(e);
         }
 
-        // Line changes. Figure out how many newline characters are there.
-        int lineDiff = Math.abs(sp2.startRow() - sp1.endRow());
-        var newLines = "\n".repeat(lineDiff);
-        var spaces = " ".repeat(sp2.startCol());
-        return newLines + spaces;
+        return builder.toString();
     }
 
     private String sourceSegmentsToSource(List<SourceSegment> sourceSegments) {
         sourceSegments.sort(sourceSegmentSorter);
         var builder = new StringBuilder();
-        SourceSegment lastSegment = null;
         for (var srcSegment : sourceSegments) {
-            if (lastSegment != null) {
-                var whitespaces = getWhitespacesBetweenSegments(lastSegment, srcSegment);
-                builder.append(whitespaces);
+            if (!srcSegment.node.isDeleted()) {
+                builder.append(srcSegment.string);
             }
-            lastSegment = srcSegment;
-            builder.append(srcSegment.string);
         }
         return builder.toString();
     }
@@ -97,12 +81,10 @@ public class SourceGenerator {
     // and once we find one, "generate" the source for it and wrap it in a `SourceSegment` instance. We collect
     // all such leaf source segments in a list, and sort it later for codegen.
     private void populateSourceSegments(MyNode node, List<SourceSegment> leafSourceSegments) {
-        if (node.isDeleted())
-            return;
         if (node.isLeaf()) {
             // This is a leaf node. Generate a source segment.
             var leafSource = getLeafSource(node);
-            var srcSegment = new SourceSegment(leafSource, node.span());
+            var srcSegment = new SourceSegment(node, leafSource, node.span());
             leafSourceSegments.add(srcSegment);
             return;
         }
