@@ -4,7 +4,7 @@
 [submodule "tree-sitter-java"]
 	path = tree-sitter-java
 	url = https://github.com/raghav-deepsource/tree-sitter-java.git
-	branch = sealed-classes
+	branch = master
 [submodule "src/test/tree-sitter-python"]
 	path = src/test/tree-sitter-python
 	url = https://github.com/tree-sitter/tree-sitter-python.git
