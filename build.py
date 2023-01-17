@@ -12,6 +12,7 @@ import tempfile
 
 # adapted from https://github.com/tree-sitter/py-tree-sitter
 def build(repositories, output_path="libjava-tree-sitter", arch=None, verbose=True):
+    log.set_verbosity(2)
     if arch and platform.system() != "Darwin":
         arch = "64" if "64" in arch else "32"
 
