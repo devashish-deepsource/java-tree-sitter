@@ -4,36 +4,56 @@ import ai.serenade.treesitter.Node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class MyNode {
     private Node internalNode;
     private MyNode parent;
-    private final List<MyNode> children = new ArrayList<>();
+    List<MyNode> children = new ArrayList<>();
     private Span span;
 
     private boolean isDeleted;
+
+    private final String refString;
 
     public boolean isDeleted() {
         return isDeleted;
     }
 
-    public MyNode(Node internalNode, MyNode parent) {
+    public MyNode(Node internalNode, MyNode parent, String refString) {
         this.parent = parent;
+        this.refString = refString;
         this.internalNode = internalNode;
         this.span = new Span(internalNode.getRange());
     }
 
-    public MyNode(Node internalNode) {
-        this(internalNode, null);
+    private void setSpanRecursiveHelper(MyNode node, Span newSpan) {
+        for (var child : node.children) {
+            child.span = newSpan;
+            child.setSpanRecursiveHelper(child, newSpan);
+        }
+    }
+
+    public void setSpanRecursive(Span span) {
+        setSpanRecursiveHelper(this, span);
+    }
+
+    public String refString() {
+        return refString;
+    }
+
+    public MyNode(Node internalNode, String refString) {
+        this(internalNode, null, refString);
     }
 
     private void setDeletedHelper(MyNode parent, boolean deleted) {
-        parent.isDeleted = true;
+        parent.isDeleted = deleted;
         if (parent.isLeaf())
             return;
         for (var child : parent.children)
             setDeletedHelper(child, deleted);
     }
+
     public void setDeleted(boolean deleted) {
         setDeletedHelper(this, deleted);
     }
@@ -44,6 +64,10 @@ public class MyNode {
 
     public MyNode parent() {
         return parent;
+    }
+
+    public void setParent(MyNode parent) {
+        this.parent = parent;
     }
 
     public List<MyNode> children() {
@@ -61,7 +85,8 @@ public class MyNode {
     @Override
     public String toString() {
         String leafOrNoLeaf = isLeaf() ? " (Leaf)" : "";
-        return String.format("Type: %s, Range: %s%s", internalNode.getType(), internalNode.getRange(), leafOrNoLeaf);
+        String position = String.format("[(%d, %d), (%d, %d)]", span.startRow(), span.startCol(), span.endRow(), span.endCol());
+        return String.format("Type: %s, Range: %s%s", internalNode.getType(), position, leafOrNoLeaf);
     }
 
     public void resetSpan() {

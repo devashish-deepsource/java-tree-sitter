@@ -55,6 +55,8 @@ publishing {
 }
 
 dependencies {
+    // https://mvnrepository.com/artifact/com.squareup/javapoet
+    implementation 'com.squareup:javapoet:1.2.0'
     testImplementation "org.junit.jupiter:junit-jupiter:5.8.2"
 }
 

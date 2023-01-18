@@ -1,22 +1,21 @@
 package srcgen;
 
+import mytree.MergeNode;
 import mytree.MyNode;
 import mytree.Span;
 import mytree.TreeWrapper;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 public class SourceGenerator {
+    private final List<String> commonSourceLines;
+    private final MyNode node;
     record SourceSegment(MyNode node, String string, Span span) {
     }
-
-    private final List<String> sourceLines;
 
     private final Comparator<SourceSegment> sourceSegmentSorter = (seg1, seg2) -> {
         var rowDiff = seg1.span.startRow() - seg2.span.startRow();
@@ -24,9 +23,9 @@ public class SourceGenerator {
         return rowDiff == 0 ? colDiff : rowDiff;
     };
 
-    public SourceGenerator(String inputFilePath) throws IOException {
-        var sourceString = Files.readString(Paths.get(inputFilePath));
-        sourceLines = Arrays.stream(sourceString.split("\n")).toList();
+    public SourceGenerator(MyNode root) throws IOException {
+        this.node = root;
+        commonSourceLines = Arrays.stream(root.refString().split("\n")).toList();
     }
 
     private String getLeafSource(MyNode node) {
@@ -39,7 +38,7 @@ public class SourceGenerator {
         node.parent().span().consume(span);
 
         boolean endsOnTheSameLine = span.startRow() == span.endRow();
-        var startLine = sourceLines.get(span.startRow());
+        var startLine = commonSourceLines.get(span.startRow());
         if (endsOnTheSameLine)
             return startLine.substring(span.startCol(), span.endCol());
 
@@ -48,13 +47,13 @@ public class SourceGenerator {
         String startSegment = startLine.substring(span.startCol());
         builder.append(startSegment);
         for (int i = span.startRow() + 1; i < span.endRow(); i++) {
-            var line = sourceLines.get(i);
+            var line = commonSourceLines.get(i);
             builder.append(line).append("\n");
         }
 
         try {
             // It's unlikely that a leaf node expands more than one line, but if it does, we're handling it here.
-            var endLine = sourceLines.get(span.endRow());
+            var endLine = commonSourceLines.get(span.endRow());
             String endSegment = endLine.substring(0, span.endCol());
             builder.append(endSegment);
         } catch (ArrayIndexOutOfBoundsException e) {
@@ -66,7 +65,17 @@ public class SourceGenerator {
         return builder.toString();
     }
 
+    private void fixMergeNodeSpans(List<SourceSegment> sourceSegments) {
+        for (var seg : sourceSegments) {
+            if (seg.node instanceof MergeNode mergeNode) {
+                mergeNode.setSpanRecursive(mergeNode.offset());
+                mergeNode.getNode().setSpanRecursive(mergeNode.offset());
+            }
+        }
+    }
+
     private String sourceSegmentsToSource(List<SourceSegment> sourceSegments) {
+        fixMergeNodeSpans(sourceSegments);
         sourceSegments.sort(sourceSegmentSorter);
         var builder = new StringBuilder();
         for (var srcSegment : sourceSegments) {
@@ -77,32 +86,48 @@ public class SourceGenerator {
         return builder.toString();
     }
 
+    private String getMergeString(MergeNode mergeNode) {
+        try {
+            return new SourceGenerator(mergeNode.getNode()).generate();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     // We only generate source for leaf nodes. So the strategy is to go depth-first looking for leaves
     // and once we find one, "generate" the source for it and wrap it in a `SourceSegment` instance. We collect
     // all such leaf source segments in a list, and sort it later for codegen.
-    private void populateSourceSegments(MyNode node, List<SourceSegment> leafSourceSegments) {
-        if (node.isLeaf()) {
+    private void populateSourceSegments(MyNode currentNode, List<SourceSegment> leafSourceSegments) {
+        if (currentNode instanceof MergeNode mergeNode) {
+            // This is a `MergeNode`. Source
+            String mergeNodeSource = getMergeString(mergeNode);
+            var segment = new SourceSegment(mergeNode, mergeNodeSource, mergeNode.offset());
+            leafSourceSegments.add(segment);
+            return;
+        }
+
+        if (currentNode.isLeaf()) {
             // This is a leaf node. Generate a source segment.
-            var leafSource = getLeafSource(node);
-            var srcSegment = new SourceSegment(node, leafSource, node.span());
+            var leafSource = getLeafSource(currentNode);
+            var srcSegment = new SourceSegment(currentNode, leafSource, currentNode.span());
             leafSourceSegments.add(srcSegment);
             return;
         }
 
-        for (var child : node.children()) {
+        for (var child : currentNode.children()) {
             populateSourceSegments(child, leafSourceSegments);
         }
     }
 
     // TODO: how about we only keep the spans for each source segment and the token/segment string itself.
-    private List<SourceSegment> getSourceSegments(MyNode node) {
+    private List<SourceSegment> getSourceSegments() {
         var list = new ArrayList<SourceSegment>();
         populateSourceSegments(node, list);
         return list;
     }
 
-    public String generate(TreeWrapper tree) {
-        var srcSegments = getSourceSegments(tree.root());
+    public String generate() {
+        var srcSegments = getSourceSegments();
         return sourceSegmentsToSource(srcSegments);
     }
 }

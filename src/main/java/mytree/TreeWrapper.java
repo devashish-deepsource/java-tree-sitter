@@ -9,10 +9,10 @@ import java.io.IOException;
 public class TreeWrapper {
     private final MyNode root;
 
-    public TreeWrapper(Tree sitterTree) {
+    public TreeWrapper(Tree sitterTree, String commonSource) {
         var rootNode = sitterTree.getRootNode();
-        root = new MyNode(rootNode, null);
-        buildTree(root, rootNode);
+        root = new MyNode(rootNode, commonSource);
+        buildTree(root, rootNode, commonSource);
     }
 
     private MyNode lookupNodeBySpan(MyNode current, Span span) {
@@ -40,15 +40,15 @@ public class TreeWrapper {
         return root;
     }
 
-    private void buildTree(MyNode wrapperParent, Node nodeParent) {
+    private void buildTree(MyNode wrapperParent, Node nodeParent, String refString) {
         if (nodeParent.isNull())
             return;
         var childCount = nodeParent.getChildCount();
         for (var i = 0; i < childCount; i++) {
             var currentChild = nodeParent.getChild(i);
-            MyNode childNode = new MyNode(currentChild, wrapperParent);
+            MyNode childNode = new MyNode(currentChild, wrapperParent, refString);
             wrapperParent.appendChild(childNode);
-            buildTree(childNode, currentChild);
+            buildTree(childNode, currentChild, refString);
         }
     }
 
@@ -65,10 +65,10 @@ public class TreeWrapper {
         return toStringHelper(root, new StringBuilder());
     }
 
-    public String generateSource(String refSourcePath) {
+    public String generateSource() {
         try {
-            var sourceGenerator = new SourceGenerator(refSourcePath);
-            return sourceGenerator.generate(this);
+            var sourceGenerator = new SourceGenerator(this.root);
+            return sourceGenerator.generate();
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);
         }
