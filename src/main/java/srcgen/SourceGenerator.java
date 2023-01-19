@@ -35,7 +35,7 @@ public class SourceGenerator {
         var span = node.span();
         // TODO: Document consume and also clarify if it is required at all.
         // Consume this span in the parent.
-        node.parent().span().consume(span);
+        //node.parent().span().consume(span);
 
         boolean endsOnTheSameLine = span.startRow() == span.endRow();
         var startLine = commonSourceLines.get(span.startRow());

@@ -112,7 +112,7 @@ public class ParserTest extends TestBase {
         return klass.build().toString();
     }
 
-    private Tree generatePartialTreeNode(Parser parser, String programString) throws Exception {
+    private Tree generatePartialTree(Parser parser, String programString) throws Exception {
         parser.setLanguage(Languages.java());
         return parser.parseString(programString);
     }
@@ -133,15 +133,18 @@ public class ParserTest extends TestBase {
                 // So we'll always generate some boilerplate code so that the output is a valid Java program.
                 // For example, here we are wrapping the call statement in a method which in-turn is defined in a class called `Temp`.
                 String callStmtString = generateStatement("callMe()");
-                var partialTree = generatePartialTreeNode(parser, callStmtString);
+                var partialTree = generatePartialTree(parser, callStmtString);
                 TreeWrapper myPartialTree = new TreeWrapper(partialTree, callStmtString);
                 // FIXME: We are hardcoding the span of the node that we want to insert into the main tree.
                 //  Ideally, we'll use tree-sitter queries for this.
                 var callNodeSpan = new Span(new Range(2, 4, 2, 13));
-                var callStmtNode = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
-
-                Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNode, false);
+                var callStmtNodePrepend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
+                Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNodePrepend, true);
                 actInsertBefore.apply();
+
+                var callStmtNodeAppend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
+                Action actInsertAfter = new InsertSibling(mainTree, soutSpan, callStmtNodeAppend, false);
+                actInsertAfter.apply();
 
                 var source = mainTree.generateSource();
                 System.out.println(source);
