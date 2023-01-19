@@ -2,10 +2,14 @@ package mytree;
 
 import java.util.List;
 
+// It's a marker class.
 public class MergeNode extends MyNode {
     private final boolean affectsRow;
     private final MyNode myNode;
-    private final Span offset;
+
+    // Merge nodes come from a separate (partial) tree. The span of merge nodes don't make sense if we just merge them
+    // in the main tree. We need to
+    private Span offset;
 
     public MergeNode(MyNode node, MyNode parent, String refString, boolean affectsRow, Span offset) {
         super(node.getInternalNode(), parent, refString);
@@ -22,6 +26,10 @@ public class MergeNode extends MyNode {
 
     public Span offset() {
         return offset;
+    }
+
+    public void setOffset(Span offset) {
+        this.offset = offset;
     }
 
     // If merging this node in the main tree changes the number of lines that we are to see in regenerated source,

@@ -65,6 +65,7 @@ public class SourceGenerator {
         return builder.toString();
     }
 
+    // Fixme: We need to find a spot for merge nodes in the tree.
     private void fixMergeNodeSpans(List<SourceSegment> sourceSegments) {
         for (var seg : sourceSegments) {
             if (seg.node instanceof MergeNode mergeNode) {

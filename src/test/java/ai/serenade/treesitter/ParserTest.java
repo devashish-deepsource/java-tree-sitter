@@ -140,7 +140,7 @@ public class ParserTest extends TestBase {
                 var callNodeSpan = new Span(new Range(2, 4, 2, 13));
                 var callStmtNode = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
 
-                Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNode, true);
+                Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNode, false);
                 actInsertBefore.apply();
 
                 var source = mainTree.generateSource();
