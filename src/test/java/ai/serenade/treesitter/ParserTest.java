@@ -9,6 +9,7 @@ import java.nio.file.Paths;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import mytree.MergeNode;
+import mytree.MyNode;
 import mytree.Span;
 import mytree.TreeWrapper;
 import org.junit.jupiter.api.Test;
@@ -198,6 +199,34 @@ public class ParserTest extends TestBase {
             var mainTree = new TreeWrapper(tree, program);
             removeCastExpression(mainTree);
             insertCalls(parser, mainTree);
+            System.out.println(mainTree.generateSource());
+        }
+    }
+
+    private MyNode getNameNode(Parser parser) throws Exception {
+        String prog = "superTest();";
+        var tree = parser.parseString(prog);
+        var wrapper = new TreeWrapper(tree, prog);
+        var nameSpan = new Span(new Range(0, 0, 0, 9));
+        return wrapper.nodeAtSpan(nameSpan);
+    }
+
+    @Test
+    public void doAColumnFix() throws Exception {
+        try (var parser = new Parser()) {
+            parser.setLanguage(Languages.java());
+            String srcStr = "./src/test/java/ai/serenade/treesitter/TestFile.java";
+            var path = Paths.get(srcStr);
+            String program = Files.readString(path);
+            var tree = parser.parseString(program);
+            var mainTree = new TreeWrapper(tree, program);
+            var testIdSpan = new Span(new Range(5, 16, 5, 20));
+            var idNode = mainTree.nodeAtSpan(testIdSpan);
+            idNode.setDeleted(true);
+            var newNameNode = getNameNode(parser);
+            var mergeNameNode = new MergeNode(newNameNode, idNode.parent(), "superTest();", false, testIdSpan);
+            Action insertName = new InsertSibling(mainTree, testIdSpan, mergeNameNode, false);
+            insertName.apply();
             System.out.println(mainTree.generateSource());
         }
     }
