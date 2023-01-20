@@ -118,7 +118,7 @@ public class ParserTest extends TestBase {
     }
 
     @Test
-    void insertStatementAbove() throws Exception {
+    void insertStatementAboveAndBelow() throws Exception {
         try (var parser = new Parser()) {
             parser.setLanguage(Languages.java());
             String srcStr = "./src/test/java/ai/serenade/treesitter/TestFile.java";
@@ -149,6 +149,56 @@ public class ParserTest extends TestBase {
                 var source = mainTree.generateSource();
                 System.out.println(source);
             }
+        }
+    }
+
+    private void removeCastExpression(TreeWrapper mainTree) {
+        Span position = new Span(new Range(7, 24, 7, 52));
+        var offendingCastExpression = mainTree.nodeAtSpan(position);
+        for (var child : offendingCastExpression.children()) {
+            if (child.getInternalNode().getType().equals("(")) {
+                child.setDeleted(true);
+            }
+
+            if (child.getInternalNode().getType().equals(")")) {
+                child.setDeleted(true);
+            }
+
+            if (child.getInternalNode().getType().equals("generic_type")) {
+                child.setDeleted(true);
+            }
+        }
+    }
+
+    private void insertCalls(Parser parser, TreeWrapper mainTree) throws Exception {
+        var soutSpan = new Span(new Range(8, 12, 8, 41));
+        var soutNodeParent = mainTree.nodeAtSpan(soutSpan).parent();
+
+        String callStmtString = generateStatement("callMe()");
+        var partialTree = generatePartialTree(parser, callStmtString);
+        TreeWrapper myPartialTree = new TreeWrapper(partialTree, callStmtString);
+        var callNodeSpan = new Span(new Range(2, 4, 2, 13));
+        var callStmtNodePrepend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
+        Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNodePrepend, true);
+        actInsertBefore.apply();
+
+        var callStmtNodeAppend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
+        Action actInsertAfter = new InsertSibling(mainTree, soutSpan, callStmtNodeAppend, false);
+        actInsertAfter.apply();
+    }
+
+    @Test
+    public void fixMultiple() throws Exception {
+        try (var parser = new Parser()) {
+            parser.setLanguage(Languages.java());
+            String srcStr = "./src/test/java/ai/serenade/treesitter/TestFile.java";
+            var path = Paths.get(srcStr);
+            String program = Files.readString(path);
+            var tree = parser.parseString(program);
+            var mainTree = new TreeWrapper(tree, program);
+            removeCastExpression(mainTree);
+            insertCalls(parser, mainTree);
+            System.out.println(mainTree.generateSource());
         }
     }
 }
