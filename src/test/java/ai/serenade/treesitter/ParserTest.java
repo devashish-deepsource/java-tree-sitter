@@ -142,9 +142,9 @@ public class ParserTest extends TestBase {
                 Action actInsertBefore = new InsertSibling(mainTree, soutSpan, callStmtNodePrepend, true);
                 actInsertBefore.apply();
 
-                var callStmtNodeAppend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
+                /*var callStmtNodeAppend = new MergeNode(myPartialTree.nodeAtSpan(callNodeSpan), soutNodeParent, callStmtString, true, soutSpan);
                 Action actInsertAfter = new InsertSibling(mainTree, soutSpan, callStmtNodeAppend, false);
-                actInsertAfter.apply();
+                actInsertAfter.apply();*/
 
                 var source = mainTree.generateSource();
                 System.out.println(source);
