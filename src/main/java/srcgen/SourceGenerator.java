@@ -77,7 +77,6 @@ public class SourceGenerator {
 
     private String sourceSegmentsToSource(List<SourceSegment> sourceSegments) {
         fixMergeNodeSpans(sourceSegments);
-        sourceSegments.sort(sourceSegmentSorter);
         var builder = new StringBuilder();
         for (var srcSegment : sourceSegments) {
             if (!srcSegment.node.isDeleted()) {
