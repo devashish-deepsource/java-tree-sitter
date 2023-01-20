@@ -20,7 +20,7 @@ public class InsertSibling extends Action {
         this.shouldInsertBefore = shouldInsertBefore;
     }
 
-    public MyNode getWhitespaceNode(List<MyNode> childList, int refNodeIndex) {
+    public MyNode getWhitespaceNodeBeforeRef(List<MyNode> childList, int refNodeIndex) {
         // Prevent underflow.
         if (refNodeIndex == 0)
             return null;
@@ -29,7 +29,7 @@ public class InsertSibling extends Action {
         return isWhitespace ? prevNode : null;
     }
 
-    private MyNode getNewlineNode(List<MyNode> childList, int refNodeIndex) {
+    private MyNode getNewlineNodeBeforeRef(List<MyNode> childList, int refNodeIndex) {
         for (int i = refNodeIndex - 1; i >= 0; i--) {
             var thisNode = childList.get(i);
             var type = thisNode.getInternalNode().getType();
@@ -41,6 +41,28 @@ public class InsertSibling extends Action {
         return null;
     }
 
+    private MyNode getWhitespaceNodeAfterRef(List<MyNode> childList, int refNodeIndex) {
+        // Prevent overflow.
+        if (refNodeIndex == childList.size() - 1)
+            return null;
+        MyNode nextNode = childList.get(refNodeIndex + 1);
+        boolean isWhitespace = nextNode.getInternalNode().getType().equals("ws");
+        return isWhitespace ? nextNode : null;
+    }
+
+    private MyNode getNewlineNodeAfterRef(List<MyNode> childList, int refNodeIndex) {
+        for (int i = refNodeIndex + 1; i < childList.size(); i++) {
+            var thisNode = childList.get(i);
+            var type = thisNode.getInternalNode().getType();
+            if (type.equals("newline"))
+                return thisNode;
+            if (!type.equals("ws"))
+                return null;
+        }
+        return null;
+    }
+
+
     @Override
     public void apply() {
         var refNode = tree.nodeAtSpan(span);
@@ -50,16 +72,33 @@ public class InsertSibling extends Action {
         nodeToInsert.setParent(parent);
         int insertPos = shouldInsertBefore ? indexOfRefNode : indexOfRefNode + 1;
 
-        MyNode wsNode = getWhitespaceNode(parent.children(), indexOfRefNode);
-        if (wsNode != null) {
-            // Add the whitespace right before the refNode.
-            parent.children().add(insertPos, wsNode);
-        }
+        if (shouldInsertBefore) {
+            MyNode wsNode = getWhitespaceNodeBeforeRef(parent.children(), indexOfRefNode);
+            if (wsNode != null) {
+                // Add the whitespace right before the refNode.
+                parent.children().add(insertPos, wsNode);
+            }
 
-        MyNode nlNode = getNewlineNode(parent.children(), indexOfRefNode);
-        if (nlNode != null) {
-            // Add the newline right before the refNode.
-            parent.children().add(insertPos, nlNode);
+            MyNode nlNode = getNewlineNodeBeforeRef(parent.children(), indexOfRefNode);
+            if (nlNode != null) {
+                // Add the newline right before the refNode.
+                parent.children().add(insertPos, nlNode);
+            }
+        } else {
+            MyNode nlNode = getNewlineNodeAfterRef(parent.children(), indexOfRefNode);
+            if (nlNode != null) {
+                // Add the newline right before the refNode.
+                parent.children().add(insertPos, nlNode);
+                insertPos++;
+            }
+
+            // This is to fix the indent. Ideally, we should also look for whitespaces that come after the ref node on the same line.
+            MyNode wsNode = getWhitespaceNodeBeforeRef(parent.children(), indexOfRefNode);
+            if (wsNode != null) {
+                // Add the whitespace right before the refNode.
+                parent.children().add(insertPos, wsNode);
+                insertPos++;
+            }
         }
 
         parent.children().add(insertPos, nodeToInsert);
