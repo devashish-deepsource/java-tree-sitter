@@ -48,7 +48,7 @@ public class ParserTest extends TestBase {
     void regenerateSource() throws Exception {
         try (var parser = new Parser()) {
             parser.setLanguage(Languages.java());
-            var path = Paths.get("./src/main/java/ai/serenade/treesitter/TestFile.java");
+            var path = Paths.get("./src/test/java/ai/serenade/treesitter/TestFile.java");
             String program = Files.readString(path);
             try (Tree tree = parser.parseString(program)) {
                 depthFirstWalk(tree.getRootNode());
