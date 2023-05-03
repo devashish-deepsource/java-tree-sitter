@@ -25,7 +25,7 @@ public class ParserTest extends TestBase {
             parser.setLanguage(Languages.java());
             try (Tree tree = parser.parseString("public class Thing { public static void main() { System.out.println('a'); } }")) {
                 assertEquals(
-                        "(program (class_declaration (modifiers) name: (identifier) body: (class_body (method_declaration (modifiers) type: (void_type) name: (identifier) parameters: (formal_parameters) body: (block (expression_statement (method_invocation object: (field_access object: (identifier) field: (identifier)) name: (identifier) arguments: (argument_list (character_literal)))))))))",
+                        "(program (class_declaration (modifiers) (ws) (ws) name: (identifier) (ws) body: (class_body (ws) (method_declaration (modifiers (ws)) (ws) type: (void_type) (ws) name: (identifier) parameters: (formal_parameters) (ws) body: (block (ws) (expression_statement (method_invocation object: (field_access object: (identifier) field: (identifier)) name: (identifier) arguments: (argument_list (character_literal)))) (ws))) (ws))))",
                         tree.getRootNode().getNodeString()
                 );
             }

@@ -19,8 +19,8 @@ public class Parser implements AutoCloseable {
   }
 
   public Tree parseString(String source) throws UnsupportedEncodingException {
-    byte[] bytes = source.getBytes(StandardCharsets.UTF_16LE);
-    return new Tree(TreeSitter.parserParseBytes(pointer, bytes, bytes.length));
+    byte[] bytes = source.getBytes(StandardCharsets.UTF_8);
+    return new Tree(TreeSitter.parserParseBytesUTF8(pointer, bytes, bytes.length));
   }
 
   @Override

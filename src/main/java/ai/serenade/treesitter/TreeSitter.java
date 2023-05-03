@@ -1,7 +1,5 @@
 package ai.serenade.treesitter;
 
-import java.io.File;
-
 public class TreeSitter {
 
     static {
@@ -54,6 +52,8 @@ public class TreeSitter {
     public static native void parserSetLanguage(long parser, long language);
 
     public static native long parserParseBytes(long parser, byte[] source, int length);
+
+    public static native long parserParseBytesUTF8(long parser, byte[] source, int length);
 
     public static native long treeCursorNew(Node node);
 

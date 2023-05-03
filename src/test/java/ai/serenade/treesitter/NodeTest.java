@@ -22,7 +22,7 @@ public class NodeTest extends TestBase {
                 Node classDecl = root.getChild(0);
                 assertEquals("class_declaration", classDecl.getType());
                 assertEquals("superclass", classDecl.getChildByFieldName("superclass").getType());
-                assertEquals(4, classDecl.getChildCount());
+                assertEquals(9, classDecl.getChildCount());
             }
         }
     }
