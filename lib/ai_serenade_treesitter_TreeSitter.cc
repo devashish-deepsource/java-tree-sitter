@@ -111,7 +111,7 @@ jobject _marshalPoint(JNIEnv* env, TSPoint point) {
     //  This is a very crude fix to the problem: we are just dividing the row-col position
     //  by 2. We'll have to come back to it again.
   env->SetIntField(javaObject, _pointRowField, point.row);
-  env->SetIntField(javaObject, _pointColField, point.column / 2);
+  env->SetIntField(javaObject, _pointColField, point.column);
   return javaObject;
 }
 
@@ -169,12 +169,12 @@ JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeString(
 
 JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeEndByte(
     JNIEnv* env, jclass self, jobject node) {
-  return (jint)ts_node_end_byte(_unmarshalNode(env, node)) / 2;
+  return (jint)ts_node_end_byte(_unmarshalNode(env, node));
 }
 
 JNIEXPORT jint JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeStartByte(
     JNIEnv* env, jclass self, jobject node) {
-  return (jint)ts_node_start_byte(_unmarshalNode(env, node)) / 2;
+  return (jint)ts_node_start_byte(_unmarshalNode(env, node));
 }
 
 JNIEXPORT jstring JNICALL Java_ai_serenade_treesitter_TreeSitter_nodeType(
@@ -316,7 +316,7 @@ Java_ai_serenade_treesitter_TreeSitter_treeCursorCurrentTreeCursorNode(
       env,
       (TreeCursorNode){ts_node_type(node),
                        ts_tree_cursor_current_field_name((TSTreeCursor*)cursor),
-                       ts_node_start_byte(node) / 2, ts_node_end_byte(node) / 2,
+                       ts_node_start_byte(node), ts_node_end_byte(node),
                        ts_node_start_point(node), ts_node_end_point(node)});
 }
 
